@@ -1,4 +1,4 @@
-use filter::{Allpass, FeedbackComb};
+use filter::{Allpass, FeedbackComb, Filter};
 
 pub trait Reverb {
     fn process_sample(&mut self, x: (f64, f64)) -> (f64, f64);
