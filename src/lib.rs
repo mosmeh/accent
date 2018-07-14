@@ -1,5 +1,5 @@
 mod delay;
 mod filter;
-pub mod reverb;
+mod reverb;
 
 pub use reverb::*;
