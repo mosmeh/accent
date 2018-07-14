@@ -14,7 +14,7 @@ fn main() {
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .arg(
-            Arg::with_name("INPUT")
+            Arg::with_name("input")
                 .required(true)
                 .index(1)
                 .help("Input filename"),
@@ -34,20 +34,12 @@ fn main() {
                 .default_value("jcrev"),
         )
         .get_matches();
-    let input = matches.value_of("INPUT").unwrap();
+    let input = matches.value_of("input").unwrap();
     let output = matches.value_of("output").unwrap_or("out.wav");
 
     let mut reader = WavReader::open(input).expect("Failed to open input file");
     let input_channels = reader.spec().channels;
     let sample_rate = reader.spec().sample_rate;
-
-    let write_spec = WavSpec {
-        channels: 2,
-        sample_rate,
-        bits_per_sample: 16,
-        sample_format: SampleFormat::Int,
-    };
-    let mut writer = WavWriter::create(output, write_spec).expect("Failed to open output file");
 
     let mut reverb = Box::new(match matches.value_of("algorithm").unwrap() {
         "jcrev" => JCRev::new(sample_rate),
@@ -57,7 +49,7 @@ fn main() {
     let samples = reader
         .samples::<i16>()
         .map(|s| f64::from(s.unwrap().as_i16()));
-    let stereo_samples: Vec<(f64, f64)> = match input_channels {
+    let stereo_samples: Vec<_> = match input_channels {
         1 => samples.map(|s| (s, s)).collect(),
         2 => samples
             .chunks(2)
@@ -66,6 +58,14 @@ fn main() {
             .collect(),
         _ => unimplemented!(),
     };
+
+    let write_spec = WavSpec {
+        channels: 2,
+        sample_rate,
+        bits_per_sample: 16,
+        sample_format: SampleFormat::Int,
+    };
+    let mut writer = WavWriter::create(output, write_spec).expect("Failed to open output file");
 
     for x in stereo_samples {
         let (l, r) = reverb.process_sample(x);
