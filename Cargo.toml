@@ -1,0 +1,9 @@
+[package]
+name = "accent"
+version = "0.1.0"
+authors = ["mosm <airman515@gmail.com>"]
+description = "Minimal audio reverberator"
+
+[dependencies]
+clap = "2.32.0"
+hound = "3.4.0"
