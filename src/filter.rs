@@ -1,5 +1,6 @@
 use delay::Delay;
 
+// https://ccrma.stanford.edu/~jos/pasp/Allpass_Two_Combs.html
 pub struct Allpass {
     a: f64,
     b: f64,
@@ -23,6 +24,7 @@ impl Allpass {
     }
 }
 
+// https://ccrma.stanford.edu/~jos/pasp/Feedback_Comb_Filters.html
 pub struct FeedbackComb {
     a: f64,
     delay: Delay,

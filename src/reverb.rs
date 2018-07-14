@@ -4,6 +4,7 @@ pub trait Reverb {
     fn process_sample(&mut self, x: (f64, f64)) -> (f64, f64);
 }
 
+// https://ccrma.stanford.edu/~jos/pasp/Schroeder_Reverberators.html
 pub struct JCRev {
     allpasses: [Allpass; 3],
     combs: [FeedbackComb; 4],
