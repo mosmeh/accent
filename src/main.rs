@@ -15,27 +15,28 @@ fn main() {
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .arg(
             Arg::with_name("input")
+                .help("Input WAV filename")
                 .required(true)
-                .index(1)
-                .help("Input filename"),
+                .index(1),
         )
         .arg(
             Arg::with_name("output")
                 .short("o")
+                .help("Output WAV filename")
                 .takes_value(true)
-                .help("Output filename"),
+                .default_value("out.wav"),
         )
         .arg(
             Arg::with_name("algorithm")
                 .short("a")
-                .takes_value(true)
                 .help("Reverberation algorithm")
-                .possible_values(&["jcrev"])
-                .default_value("jcrev"),
+                .takes_value(true)
+                .default_value("jcrev")
+                .possible_values(&["jcrev"]),
         )
         .get_matches();
     let input = matches.value_of("input").unwrap();
-    let output = matches.value_of("output").unwrap_or("out.wav");
+    let output = matches.value_of("output").unwrap();
 
     let mut reader = WavReader::open(input).expect("Failed to open input file");
     let input_channels = reader.spec().channels;
