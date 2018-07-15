@@ -20,10 +20,10 @@ impl JCRev {
                 Allpass::new(-0.7, -0.7, (sr_factor * 37.0) as usize),
             ],
             combs: [
-                FeedbackComb::new(0.773, (sr_factor * 1687.0) as usize),
-                FeedbackComb::new(0.802, (sr_factor * 1601.0) as usize),
-                FeedbackComb::new(0.753, (sr_factor * 2053.0) as usize),
-                FeedbackComb::new(0.733, (sr_factor * 2251.0) as usize),
+                FeedbackComb::new(-0.773, (sr_factor * 1687.0) as usize),
+                FeedbackComb::new(-0.802, (sr_factor * 1601.0) as usize),
+                FeedbackComb::new(-0.753, (sr_factor * 2053.0) as usize),
+                FeedbackComb::new(-0.733, (sr_factor * 2251.0) as usize),
             ],
         }
     }
