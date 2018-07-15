@@ -7,10 +7,10 @@ extern crate itertools;
 
 use accent::*;
 use clap::{App, Arg};
-use hound::{Sample, SampleFormat, WavReader, WavSpec, WavWriter};
+use hound::{Error, Sample, SampleFormat, WavReader, WavSpec, WavWriter};
 use itertools::Itertools;
 
-fn main() {
+fn main() -> Result<(), Error> {
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
@@ -40,7 +40,7 @@ fn main() {
     let input = matches.value_of("input").unwrap();
     let output = matches.value_of("output").unwrap();
 
-    let mut reader = WavReader::open(input).expect("Failed to open input file");
+    let mut reader = WavReader::open(input)?;
     let input_channels = reader.spec().channels;
     let sample_rate = reader.spec().sample_rate;
 
@@ -68,13 +68,15 @@ fn main() {
         bits_per_sample: 16,
         sample_format: SampleFormat::Int,
     };
-    let mut writer = WavWriter::create(output, write_spec).expect("Failed to open output file");
+    let mut writer = WavWriter::create(output, write_spec)?;
 
     for x in stereo_samples {
         let (l, r) = reverb.process_sample(x);
-        writer.write_sample(l as i16).unwrap();
-        writer.write_sample(r as i16).unwrap();
+        writer.write_sample(l as i16)?;
+        writer.write_sample(r as i16)?;
     }
 
-    writer.finalize().expect("Failed to finalize");
+    writer.finalize()?;
+
+    Ok(())
 }
