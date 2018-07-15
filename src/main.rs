@@ -1,3 +1,5 @@
+#![deny(bare_trait_objects)]
+
 extern crate accent;
 extern crate clap;
 extern crate hound;
@@ -42,10 +44,10 @@ fn main() {
     let input_channels = reader.spec().channels;
     let sample_rate = reader.spec().sample_rate;
 
-    let mut reverb = Box::new(match matches.value_of("algorithm").unwrap() {
-        "jcrev" => JCRev::new(sample_rate),
+    let mut reverb: Box<dyn Reverb> = match matches.value_of("algorithm").unwrap() {
+        "jcrev" => Box::new(JCRev::new(sample_rate)),
         _ => unreachable!(),
-    });
+    };
 
     let samples = reader
         .samples::<i16>()
