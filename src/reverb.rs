@@ -31,12 +31,12 @@ impl JCRev {
 
 impl Reverb for JCRev {
     fn process_sample(&mut self, x: (f64, f64)) -> (f64, f64) {
+        let input = (x.0 + x.1) / 2.0;
+
         let allpass_output = self
             .allpasses
             .iter_mut()
-            .fold((x.0 + x.1) / 2.0, |acc, allpass| {
-                allpass.process_sample(acc)
-            });
+            .fold(input, |output, a| a.process_sample(output));
 
         let comb_output: Vec<_> = self
             .combs
