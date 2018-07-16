@@ -13,18 +13,19 @@ pub struct JCRev {
 impl JCRev {
     pub fn new(sample_rate: u32) -> Self {
         let sr_factor = f64::from(sample_rate) / 25000.0;
+        macro_rules! allpasses_from_delays {
+            ($($delay:expr),*) => {[$(
+                Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
+            )*]}
+        }
+        macro_rules! combs_from_feedbacks_and_delays {
+            ($($am:expr, $delay:expr);*) => {[$(
+                FeedbackComb::new($am, (sr_factor * f64::from($delay)) as usize),
+            )*]}
+        }
         Self {
-            allpasses: [
-                Allpass::new(-0.7, -0.7, (sr_factor * 347.0) as usize),
-                Allpass::new(-0.7, -0.7, (sr_factor * 113.0) as usize),
-                Allpass::new(-0.7, -0.7, (sr_factor * 37.0) as usize),
-            ],
-            combs: [
-                FeedbackComb::new(-0.773, (sr_factor * 1687.0) as usize),
-                FeedbackComb::new(-0.802, (sr_factor * 1601.0) as usize),
-                FeedbackComb::new(-0.753, (sr_factor * 2053.0) as usize),
-                FeedbackComb::new(-0.733, (sr_factor * 2251.0) as usize),
-            ],
+            allpasses: allpasses_from_delays![347, 113, 37],
+            combs: combs_from_feedbacks_and_delays![-0.773, 1687; -0.802, 1601; -0.753, 2053; -0.733, 2251],
         }
     }
 }
