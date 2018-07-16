@@ -35,6 +35,11 @@ fn main() -> Result<(), Error> {
                 .arg(&arg_input),
         )
         .subcommand(
+            SubCommand::with_name("satrev")
+                .about("SATREV")
+                .arg(&arg_input),
+        )
+        .subcommand(
             SubCommand::with_name("freeverb")
                 .about("Freeverb")
                 .arg(&arg_input)
@@ -61,6 +66,7 @@ fn main() -> Result<(), Error> {
 
     let mut reverb: Box<dyn Reverb> = match app_m.subcommand() {
         ("jcrev", Some(_)) => Box::new(JCRev::new(sample_rate)),
+        ("satrev", Some(_)) => Box::new(SATREV::new(sample_rate)),
         ("freeverb", Some(sub_m)) => Box::new(Freeverb::new(
             sample_rate,
             sub_m.value_of("roomsize").unwrap().parse()?,
