@@ -2,51 +2,73 @@
 
 extern crate accent;
 extern crate clap;
+extern crate failure;
 extern crate hound;
 extern crate itertools;
 
 use accent::*;
-use clap::{App, Arg};
-use hound::{Error, Sample, SampleFormat, WavReader, WavSpec, WavWriter};
+use clap::{App, Arg, SubCommand};
+use failure::{err_msg, Error};
+use hound::{Sample, SampleFormat, WavReader, WavSpec, WavWriter};
 use itertools::Itertools;
 
 fn main() -> Result<(), Error> {
-    let matches = App::new(env!("CARGO_PKG_NAME"))
+    let arg_input = Arg::with_name("input")
+        .help("Input WAV filename")
+        .required(true)
+        .index(1);
+    let app_m = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
-        .arg(
-            Arg::with_name("input")
-                .help("Input WAV filename")
-                .required(true)
-                .index(1),
-        )
         .arg(
             Arg::with_name("output")
                 .short("o")
                 .help("Output WAV filename")
                 .takes_value(true)
-                .default_value("out.wav"),
+                .default_value("out.wav")
+                .global(true),
         )
-        .arg(
-            Arg::with_name("algorithm")
-                .short("a")
-                .help("Reverberation algorithm")
-                .takes_value(true)
-                .default_value("jcrev")
-                .possible_values(&["jcrev", "freeverb"]),
+        .subcommand(
+            SubCommand::with_name("jcrev")
+                .about("JCRev")
+                .arg(&arg_input),
+        )
+        .subcommand(
+            SubCommand::with_name("freeverb")
+                .about("Freeverb")
+                .arg(&arg_input)
+                .arg(
+                    Arg::with_name("roomsize")
+                        .long("roomsize")
+                        .default_value("0.1"),
+                )
+                .arg(Arg::with_name("damp").long("damp").default_value("0.1"))
+                .arg(Arg::with_name("width").long("width").default_value("1"))
+                .arg(Arg::with_name("wet").long("wet").default_value("1"))
+                .arg(Arg::with_name("dry").long("dry").default_value("0")),
         )
         .get_matches();
-    let input = matches.value_of("input").unwrap();
-    let output = matches.value_of("output").unwrap();
+    let input = match app_m.subcommand() {
+        (_, Some(sub_m)) => sub_m.value_of("input").unwrap(),
+        _ => return Err(err_msg("Reveberation algorithm were not provided")),
+    };
+    let output = app_m.value_of("output").unwrap();
 
     let mut reader = WavReader::open(input)?;
     let input_channels = reader.spec().channels;
     let sample_rate = reader.spec().sample_rate;
 
-    let mut reverb: Box<dyn Reverb> = match matches.value_of("algorithm").unwrap() {
-        "jcrev" => Box::new(JCRev::new(sample_rate)),
-        "freeverb" => Box::new(Freeverb::new(sample_rate, 0.1, 0.1, 1.0, 1.0, 0.0)),
+    let mut reverb: Box<dyn Reverb> = match app_m.subcommand() {
+        ("jcrev", Some(_)) => Box::new(JCRev::new(sample_rate)),
+        ("freeverb", Some(sub_m)) => Box::new(Freeverb::new(
+            sample_rate,
+            sub_m.value_of("roomsize").unwrap().parse()?,
+            sub_m.value_of("damp").unwrap().parse()?,
+            sub_m.value_of("width").unwrap().parse()?,
+            sub_m.value_of("wet").unwrap().parse()?,
+            sub_m.value_of("dry").unwrap().parse()?,
+        )),
         _ => unreachable!(),
     };
 

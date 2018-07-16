@@ -2,7 +2,11 @@
 Minimal audio reverberator
 
 ## Usage
-To add reverberation to ```input.wav``` using JCRev algorithm and place the output into ```output.wav```, run:
+To add reverberation to `input.wav` using Freeverb algorithm and place the output into `output.wav`, run:
 ```
-cargo run input.wav -o output.wav -a jcrev
+cargo run freeverb input.wav -o output.wav
 ```
+
+Following algorithms are supported:
+ - `jcrev` (JCRev)
+ - `freeverb` (Freeverb)
