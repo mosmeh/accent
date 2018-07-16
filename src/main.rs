@@ -34,7 +34,7 @@ fn main() -> Result<(), Error> {
                 .help("Reverberation algorithm")
                 .takes_value(true)
                 .default_value("jcrev")
-                .possible_values(&["jcrev"]),
+                .possible_values(&["jcrev", "freeverb"]),
         )
         .get_matches();
     let input = matches.value_of("input").unwrap();
@@ -46,6 +46,7 @@ fn main() -> Result<(), Error> {
 
     let mut reverb: Box<dyn Reverb> = match matches.value_of("algorithm").unwrap() {
         "jcrev" => Box::new(JCRev::new(sample_rate)),
+        "freeverb" => Box::new(Freeverb::new(sample_rate, 0.1, 0.1, 1.0, 1.0, 0.0)),
         _ => unreachable!(),
     };
 
