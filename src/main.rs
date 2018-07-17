@@ -35,6 +35,11 @@ fn main() -> Result<(), Error> {
                 .arg(&arg_input),
         )
         .subcommand(
+            SubCommand::with_name("satrev")
+                .about("SATREV")
+                .arg(&arg_input),
+        )
+        .subcommand(
             SubCommand::with_name("stk-jcrev")
                 .about("JCRev in Synthesis ToolKit")
                 .arg(&arg_input)
@@ -47,9 +52,6 @@ fn main() -> Result<(), Error> {
                 .arg(Arg::with_name("t60").long("t60").default_value("1")),
         )
         .subcommand(
-            SubCommand::with_name("satrev")
-                .about("SATREV")
-                .arg(&arg_input),
         )
         .subcommand(
             SubCommand::with_name("freeverb")
@@ -78,6 +80,7 @@ fn main() -> Result<(), Error> {
 
     let mut reverb: Box<dyn Reverb> = match app_m.subcommand() {
         ("jcrev", Some(_)) => Box::new(JCRev::new(sample_rate)),
+        ("satrev", Some(_)) => Box::new(SATREV::new(sample_rate)),
         ("stk-jcrev", Some(sub_m)) => Box::new(STKJCRev::new(
             sample_rate,
             sub_m.value_of("t60").unwrap().parse()?,
@@ -86,7 +89,6 @@ fn main() -> Result<(), Error> {
             sample_rate,
             sub_m.value_of("t60").unwrap().parse()?,
         )),
-        ("satrev", Some(_)) => Box::new(SATREV::new(sample_rate)),
         ("freeverb", Some(sub_m)) => Box::new(Freeverb::new(
             sample_rate,
             sub_m.value_of("roomsize").unwrap().parse()?,

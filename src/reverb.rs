@@ -73,7 +73,9 @@ impl STKJCRev {
             ($($delay:expr),*) => {[$(
                 (
                     Delay::new((sr_factor * f64::from($delay)) as usize),
-                    FeedforwardComb::new(0.8 * (10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)), 0.2, (sr_factor * f64::from($delay)) as usize),
+                    FeedforwardComb::new(
+                        0.8 * (10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)),
+                        0.2, (sr_factor * f64::from($delay)) as usize),
                 ),
             )*]}
         }
@@ -138,7 +140,8 @@ impl PRCRev {
         }
         macro_rules! combs_from_delays {
             ($($delay:expr),*) => {[$(
-                FeedbackComb::new(-(10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)), (sr_factor * f64::from($delay)) as usize),
+                FeedbackComb::new(-(10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)),
+                    (sr_factor * f64::from($delay)) as usize),
             )*]}
         }
         Self {
@@ -257,14 +260,16 @@ impl MonoFreeverb {
         let sr_factor = f64::from(sample_rate) / 44100.0;
         macro_rules! lbcfs_from_delays {
             ($($delay:expr),*) => {[$(
-                LowpassFeedbackComb::new(feedback, damp, (sr_factor * f64::from($delay + stereo_spread)) as usize),
+                LowpassFeedbackComb::new(feedback, damp,
+                    (sr_factor * f64::from($delay + stereo_spread)) as usize),
             )*]}
         }
         macro_rules! allpasses_from_delays {
             ($($delay:expr),*) => {[$(
                 (
                     FeedbackComb::new(-G, (sr_factor * f64::from($delay + stereo_spread)) as usize),
-                    FeedforwardComb::new(-1.0, 1.0 + G, (sr_factor * f64::from($delay + stereo_spread)) as usize)
+                    FeedforwardComb::new(-1.0, 1.0 + G,
+                        (sr_factor * f64::from($delay + stereo_spread)) as usize)
                 ),
             )*]}
         }

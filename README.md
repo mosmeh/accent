@@ -14,7 +14,7 @@ cargo run freeverb input.wav -o output.wav --roomsize=0.5 --damp=0.2
 
 Following algorithms are available:
  - `jcrev` (original JCRev)
+ - `satrev` (SATREV)
  - `stk-jcrev` (JCRev in Synthesis ToolKit)
  - `prcrev` (PRCRev)
- - `satrev` (SATREV)
  - `freeverb` (Freeverb)
