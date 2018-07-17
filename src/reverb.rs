@@ -125,7 +125,7 @@ impl Reverb for STKJCRev {
 // https://github.com/thestk/stk/blob/master/include/PRCRev.h
 pub struct PRCRev {
     allpasses: [Allpass; 2],
-    delays: [(Delay, f64); 2],
+    combs: [FeedbackComb; 2],
 }
 
 impl PRCRev {
@@ -136,17 +136,14 @@ impl PRCRev {
                 Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
             )*]}
         }
-        macro_rules! delays {
+        macro_rules! combs_from_delays {
             ($($delay:expr),*) => {[$(
-                (
-                    Delay::new((sr_factor * f64::from($delay)) as usize),
-                    (10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)),
-                ),
+                FeedbackComb::new(-(10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)), (sr_factor * f64::from($delay)) as usize),
             )*]}
         }
         Self {
             allpasses: allpasses_from_delays![341, 613],
-            delays: delays![1557, 2137],
+            combs: combs_from_delays![1557, 2137],
         }
     }
 }
@@ -160,17 +157,13 @@ impl Reverb for PRCRev {
             .iter_mut()
             .fold(input, |output, a| a.process_sample(output));
 
-        let delay_output: Vec<_> = self
-            .delays
+        let comb_output: Vec<_> = self
+            .combs
             .iter_mut()
-            .map(|(delay, coef)| {
-                let output = allpass_output + *coef * delay.output();
-                delay.input(output);
-                0.5 * (input + output)
-            })
+            .map(|c| 0.5 * (input + c.process_sample(allpass_output)))
             .collect();
 
-        (delay_output[0], delay_output[1])
+        (comb_output[0], comb_output[1])
     }
 }
 
