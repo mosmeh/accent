@@ -120,6 +120,57 @@ impl Reverb for STKJCRev {
     }
 }
 
+pub struct PRCRev {
+    allpasses: [Allpass; 2],
+    delays: [(Delay, f64); 2],
+}
+
+impl PRCRev {
+    pub fn new(sample_rate: u32, t60: f64) -> Self {
+        let sr_factor = f64::from(sample_rate) / 44100.0;
+        macro_rules! allpasses_from_delays {
+            ($($delay:expr),*) => {[$(
+                Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
+            )*]}
+        }
+        macro_rules! delays {
+            ($($delay:expr),*) => {[$(
+                (
+                    Delay::new((sr_factor * f64::from($delay)) as usize),
+                    (10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)),
+                ),
+            )*]}
+        }
+        Self {
+            allpasses: allpasses_from_delays![341, 613],
+            delays: delays![1557, 2137],
+        }
+    }
+}
+
+impl Reverb for PRCRev {
+    fn process_sample(&mut self, x: (f64, f64)) -> (f64, f64) {
+        let input = (x.0 + x.1) / 2.0;
+
+        let allpass_output = self
+            .allpasses
+            .iter_mut()
+            .fold(input, |output, a| a.process_sample(output));
+
+        let delay_output: Vec<_> = self
+            .delays
+            .iter_mut()
+            .map(|(delay, coef)| {
+                let output = allpass_output + *coef * delay.output();
+                delay.input(output);
+                0.5 * (input + output)
+            })
+            .collect();
+
+        (delay_output[0], delay_output[1])
+    }
+}
+
 // https://ccrma.stanford.edu/~jos/pasp/Example_Schroeder_Reverberators.html
 pub struct SATREV {
     combs: [FeedbackComb; 4],

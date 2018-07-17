@@ -41,6 +41,12 @@ fn main() -> Result<(), Error> {
                 .arg(Arg::with_name("t60").long("t60").default_value("1")),
         )
         .subcommand(
+            SubCommand::with_name("prcrev")
+                .about("PRCRev")
+                .arg(&arg_input)
+                .arg(Arg::with_name("t60").long("t60").default_value("1")),
+        )
+        .subcommand(
             SubCommand::with_name("satrev")
                 .about("SATREV")
                 .arg(&arg_input),
@@ -73,6 +79,10 @@ fn main() -> Result<(), Error> {
     let mut reverb: Box<dyn Reverb> = match app_m.subcommand() {
         ("jcrev", Some(_)) => Box::new(JCRev::new(sample_rate)),
         ("stk-jcrev", Some(sub_m)) => Box::new(STKJCRev::new(
+            sample_rate,
+            sub_m.value_of("t60").unwrap().parse()?,
+        )),
+        ("prcrev", Some(sub_m)) => Box::new(PRCRev::new(
             sample_rate,
             sub_m.value_of("t60").unwrap().parse()?,
         )),
