@@ -8,6 +8,7 @@ cargo run freeverb input.wav -o output.wav
 ```
 
 Following algorithms are supported:
- - `jcrev` (JCRev)
+ - `jcrev` (original JCRev)
+ - `stk-jcrev` (JCRev in Synthesis ToolKit)
  - `satrev` (SATREV)
  - `freeverb` (Freeverb)
