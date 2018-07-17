@@ -17,4 +17,5 @@ Following algorithms are available:
  - `satrev` (SATREV)
  - `stk-jcrev` (JCRev in Synthesis ToolKit)
  - `prcrev` (PRCRev)
+ - `nrev` (NRev)
  - `freeverb` (Freeverb)

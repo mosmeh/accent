@@ -52,6 +52,10 @@ fn main() -> Result<(), Error> {
                 .arg(Arg::with_name("t60").long("t60").default_value("1")),
         )
         .subcommand(
+            SubCommand::with_name("nrev")
+                .about("NRev")
+                .arg(&arg_input)
+                .arg(Arg::with_name("t60").long("t60").default_value("1")),
         )
         .subcommand(
             SubCommand::with_name("freeverb")
@@ -86,6 +90,10 @@ fn main() -> Result<(), Error> {
             sub_m.value_of("t60").unwrap().parse()?,
         )),
         ("prcrev", Some(sub_m)) => Box::new(PRCRev::new(
+            sample_rate,
+            sub_m.value_of("t60").unwrap().parse()?,
+        )),
+        ("nrev", Some(sub_m)) => Box::new(NRev::new(
             sample_rate,
             sub_m.value_of("t60").unwrap().parse()?,
         )),
