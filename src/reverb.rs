@@ -54,6 +54,7 @@ impl Reverb for JCRev {
 }
 
 // https://ccrma.stanford.edu/software/stk/
+// https://github.com/thestk/stk/blob/master/include/JCRev.h
 pub struct STKJCRev {
     allpasses: [Allpass; 3],
     combs: [(Delay, FeedforwardComb); 4],
@@ -120,6 +121,8 @@ impl Reverb for STKJCRev {
     }
 }
 
+// https://ccrma.stanford.edu/software/stk/
+// https://github.com/thestk/stk/blob/master/include/PRCRev.h
 pub struct PRCRev {
     allpasses: [Allpass; 2],
     delays: [(Delay, f64); 2],
