@@ -13,15 +13,15 @@ pub struct JCRev {
 
 impl JCRev {
     pub fn new(sample_rate: u32) -> Self {
-        let sr_factor = f64::from(sample_rate) / 25000.0;
+        let scale_delay = |d| (f64::from(sample_rate) / 25000.0 * f64::from(d)) as usize;
         macro_rules! allpasses_from_delays {
             ($($delay:expr),*) => {[$(
-                Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
+                Allpass::new(-0.7, -0.7, scale_delay($delay)),
             )*]}
         }
         macro_rules! combs_from_feedbacks_and_delays {
             ($($am:expr, $delay:expr);*) => {[$(
-                FeedbackComb::new($am, (sr_factor * f64::from($delay)) as usize),
+                FeedbackComb::new($am, scale_delay($delay)),
             )*]}
         }
         Self {
@@ -63,25 +63,24 @@ pub struct STKJCRev {
 
 impl STKJCRev {
     pub fn new(sample_rate: u32, t60: f64) -> Self {
-        let sr_factor = f64::from(sample_rate) / 44100.0;
+        let scale_delay = |d| (f64::from(sample_rate) / 44100.0 * f64::from(d)) as usize;
         macro_rules! allpasses_from_delays {
             ($($delay:expr),*) => {[$(
-                Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
+                Allpass::new(-0.7, -0.7, scale_delay($delay)),
             )*]}
         }
         macro_rules! combs_from_delays {
             ($($delay:expr),*) => {[$(
                 (
-                    Delay::new((sr_factor * f64::from($delay)) as usize),
+                    Delay::new(scale_delay($delay)),
                     FeedforwardComb::new(
-                        0.8 * (10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)),
-                        0.2, (sr_factor * f64::from($delay)) as usize),
+                        0.8 * (10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)), 0.2, scale_delay($delay)),
                 ),
             )*]}
         }
         macro_rules! delays {
             ($($delay:expr),*) => {[$(
-                Delay::new((sr_factor * f64::from($delay)) as usize),
+                Delay::new(scale_delay($delay)),
             )*]}
         }
         Self {
@@ -132,16 +131,15 @@ pub struct PRCRev {
 
 impl PRCRev {
     pub fn new(sample_rate: u32, t60: f64) -> Self {
-        let sr_factor = f64::from(sample_rate) / 44100.0;
+        let scale_delay = |d| (f64::from(sample_rate) / 44100.0 * f64::from(d)) as usize;
         macro_rules! allpasses_from_delays {
             ($($delay:expr),*) => {[$(
-                Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
+                Allpass::new(-0.7, -0.7, scale_delay($delay)),
             )*]}
         }
         macro_rules! combs_from_delays {
             ($($delay:expr),*) => {[$(
-                FeedbackComb::new(-(10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)),
-                    (sr_factor * f64::from($delay)) as usize),
+                FeedbackComb::new(-(10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)), scale_delay($delay)),
             )*]}
         }
         Self {
@@ -180,16 +178,15 @@ pub struct NRev {
 
 impl NRev {
     pub fn new(sample_rate: u32, t60: f64) -> Self {
-        let sr_factor = f64::from(sample_rate) / 25641.0;
+        let scale_delay = |d| (f64::from(sample_rate) / 25641.0 * f64::from(d)) as usize;
         macro_rules! combs_from_delays {
             ($($delay:expr),*) => {[$(
-                FeedbackComb::new(-(10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)),
-                    (sr_factor * f64::from($delay)) as usize),
+                FeedbackComb::new(-(10.0 as f64).powf(-3.0 * f64::from($delay) / (44100.0 * t60)), scale_delay($delay)),
             )*]}
         }
         macro_rules! allpasses_from_delays {
             ($($delay:expr),*) => {[$(
-                Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
+                Allpass::new(-0.7, -0.7, scale_delay($delay)),
             )*]}
         }
         Self {
@@ -234,15 +231,15 @@ pub struct SATREV {
 
 impl SATREV {
     pub fn new(sample_rate: u32) -> Self {
-        let sr_factor = f64::from(sample_rate) / 25000.0;
+        let scale_delay = |d| (f64::from(sample_rate) / 25000.0 * f64::from(d)) as usize;
         macro_rules! combs_from_feedbacks_and_delays {
             ($($am:expr, $delay:expr);*) => {[$(
-                FeedbackComb::new($am, (sr_factor * f64::from($delay)) as usize),
+                FeedbackComb::new($am, scale_delay($delay)),
             )*]}
         }
         macro_rules! allpasses_from_delays {
             ($($delay:expr),*) => {[$(
-                Allpass::new(-0.7, -0.7, (sr_factor * f64::from($delay)) as usize),
+                Allpass::new(-0.7, -0.7, scale_delay($delay)),
             )*]}
         }
         Self {
@@ -306,31 +303,28 @@ impl Reverb for Freeverb {
 }
 
 struct MonoFreeverb {
-    lbcfs: [LowpassFeedbackComb; 8],
+    lfbcs: [LowpassFeedbackComb; 8],
     allpasses: [(FeedbackComb, FeedforwardComb); 4],
 }
 
 impl MonoFreeverb {
     fn new(sample_rate: u32, feedback: f64, damp: f64, stereo_spread: u32) -> Self {
-        const G: f64 = 0.5;
-        let sr_factor = f64::from(sample_rate) / 44100.0;
-        macro_rules! lbcfs_from_delays {
+        let scale_delay = |d| (f64::from(sample_rate) / 44100.0 * f64::from(d)) as usize;
+        macro_rules! lfbcs_from_delays {
             ($($delay:expr),*) => {[$(
-                LowpassFeedbackComb::new(feedback, damp,
-                    (sr_factor * f64::from($delay + stereo_spread)) as usize),
+                LowpassFeedbackComb::new(feedback, damp, scale_delay($delay + stereo_spread)),
             )*]}
         }
         macro_rules! allpasses_from_delays {
             ($($delay:expr),*) => {[$(
                 (
-                    FeedbackComb::new(-G, (sr_factor * f64::from($delay + stereo_spread)) as usize),
-                    FeedforwardComb::new(-1.0, 1.0 + G,
-                        (sr_factor * f64::from($delay + stereo_spread)) as usize)
+                    FeedbackComb::new(-0.5, scale_delay($delay + stereo_spread)),
+                    FeedforwardComb::new(-1.0, 1.5, scale_delay($delay + stereo_spread)),
                 ),
             )*]}
         }
         Self {
-            lbcfs: lbcfs_from_delays![1557, 1617, 1491, 1422, 1277, 1356, 1188, 1116],
+            lfbcs: lfbcs_from_delays![1557, 1617, 1491, 1422, 1277, 1356, 1188, 1116],
             allpasses: allpasses_from_delays![225, 556, 441, 341],
         }
     }
@@ -338,11 +332,11 @@ impl MonoFreeverb {
 
 impl Filter for MonoFreeverb {
     fn process_sample(&mut self, x: f64) -> f64 {
-        let lbcf_output = self.lbcfs.iter_mut().map(|c| c.process_sample(x)).sum();
+        let lfbc_output = self.lfbcs.iter_mut().map(|c| c.process_sample(x)).sum();
 
         self.allpasses
             .iter_mut()
-            .fold(lbcf_output, |acc, (fbcf, ffcf)| {
+            .fold(lfbc_output, |acc, (fbcf, ffcf)| {
                 ffcf.process_sample(fbcf.process_sample(acc))
             })
     }
