@@ -7,8 +7,8 @@ extern crate hound;
 extern crate itertools;
 
 use accent::*;
-use clap::{App, Arg, SubCommand};
-use failure::{err_msg, Error};
+use clap::{App, AppSettings, Arg, SubCommand};
+use failure::Error;
 use hound::{Sample, SampleFormat, WavReader, WavSpec, WavWriter};
 use itertools::Itertools;
 
@@ -21,12 +21,14 @@ fn main() -> Result<(), Error> {
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .setting(AppSettings::VersionlessSubcommands)
         .arg(
             Arg::with_name("output")
                 .short("o")
                 .help("Output WAV filename")
-                .takes_value(true)
                 .default_value("out.wav")
+                .takes_value(true)
                 .global(true),
         )
         .subcommand(
@@ -74,7 +76,7 @@ fn main() -> Result<(), Error> {
         .get_matches();
     let input = match app_m.subcommand() {
         (_, Some(sub_m)) => sub_m.value_of("input").unwrap(),
-        _ => return Err(err_msg("Reveberation algorithm were not provided")),
+        _ => unreachable!(),
     };
     let output = app_m.value_of("output").unwrap();
 
