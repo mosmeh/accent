@@ -6,7 +6,7 @@ pub struct Delay {
 
 impl Delay {
     pub fn new(length: usize) -> Self {
-        let mut buffer = VecDeque::new();
+        let mut buffer = VecDeque::with_capacity(length);
         for _ in 0..length {
             buffer.push_back(0.0);
         }
