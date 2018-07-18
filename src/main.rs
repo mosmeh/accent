@@ -9,12 +9,12 @@ extern crate itertools;
 use accent::*;
 use clap::{App, AppSettings, Arg, SubCommand};
 use failure::Error;
-use hound::{Sample, SampleFormat, WavReader, WavSpec, WavWriter};
+use hound::{SampleFormat, WavReader, WavSpec, WavWriter};
 use itertools::Itertools;
 
 fn main() -> Result<(), Error> {
     let arg_input = Arg::with_name("input")
-        .help("Input WAV filename")
+        .help("Input WAV (signed 16 bit PCM) file")
         .required(true)
         .index(1);
     let app_m = App::new(env!("CARGO_PKG_NAME"))
@@ -26,7 +26,7 @@ fn main() -> Result<(), Error> {
         .arg(
             Arg::with_name("output")
                 .short("o")
-                .help("Output WAV filename")
+                .help("Output WAV file")
                 .default_value("out.wav")
                 .takes_value(true)
                 .global(true),
@@ -110,9 +110,7 @@ fn main() -> Result<(), Error> {
         _ => unreachable!(),
     };
 
-    let samples = reader
-        .samples::<i16>()
-        .map(|s| f64::from(s.unwrap().as_i16()));
+    let samples = reader.samples::<i16>().map(|s| f64::from(s.unwrap()));
     let stereo_samples: Vec<_> = match input_channels {
         1 => samples.map(|s| (s, s)).collect(),
         2 => samples
