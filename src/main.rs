@@ -2,17 +2,15 @@
 
 extern crate accent;
 extern crate clap;
-extern crate failure;
 extern crate hound;
 extern crate itertools;
 
 use accent::*;
 use clap::{App, AppSettings, Arg, SubCommand};
-use failure::Error;
 use hound::{SampleFormat, WavReader, WavSpec, WavWriter};
 use itertools::Itertools;
 
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let arg_input = Arg::with_name("input")
         .help("Input WAV (signed 16 bit PCM) file")
         .required(true)
