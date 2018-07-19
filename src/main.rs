@@ -12,7 +12,7 @@ use itertools::Itertools;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let arg_input = Arg::with_name("input")
-        .help("Input WAV (signed 16 bit PCM) file")
+        .help("Input WAV file")
         .required(true)
         .index(1);
     let app_m = App::new(env!("CARGO_PKG_NAME"))
@@ -108,13 +108,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         _ => unreachable!(),
     };
 
-    let samples = reader.samples::<i16>().map(|s| f64::from(s.unwrap()));
+    let samples: Vec<_> = match reader.spec().sample_format {
+        SampleFormat::Int => match reader.spec().bits_per_sample {
+            16 => reader
+                .samples::<i16>()
+                .map(|s| f32::from(s.unwrap()) / f32::from(std::i16::MAX))
+                .collect(),
+            32 => reader
+                .samples::<i32>()
+                .map(|s| s.unwrap() as f32 / (std::i32::MAX as f32))
+                .collect(),
+            _ => unimplemented!(),
+        },
+        SampleFormat::Float => reader.samples::<f32>().map(|s| s.unwrap()).collect(),
+    };
     let stereo_samples: Vec<_> = match input_channels {
-        1 => samples.map(|s| (s, s)).collect(),
+        1 => samples.iter().map(|s| (s, s)).collect(),
         2 => samples
+            .iter()
             .chunks(2)
             .into_iter()
-            .map(|mut c| c.next_tuple::<(f64, f64)>().unwrap())
+            .map(|mut c| c.next_tuple().unwrap())
             .collect(),
         _ => unimplemented!(),
     };
@@ -127,10 +141,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let mut writer = WavWriter::create(output, write_spec)?;
 
-    for x in stereo_samples {
-        let (l, r) = reverb.process_sample(x);
-        writer.write_sample(l as i16)?;
-        writer.write_sample(r as i16)?;
+    for (l_in, r_in) in stereo_samples {
+        let (l_out, r_out) = reverb.process_sample((f64::from(*l_in), f64::from(*r_in)));
+        writer.write_sample((f64::from(std::i16::MAX) * l_out) as i16)?;
+        writer.write_sample((f64::from(std::i16::MAX) * r_out) as i16)?;
     }
 
     writer.finalize()?;
