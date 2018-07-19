@@ -29,6 +29,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(true)
                 .global(true),
         )
+        .arg(
+            Arg::with_name("gain")
+                .short("g")
+                .long("gain")
+                .help("Final gain in dB")
+                .default_value("0")
+                .takes_value(true)
+                .global(true),
+        )
         .subcommand(
             SubCommand::with_name("jcrev")
                 .about("Original JCRev")
@@ -77,6 +86,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         _ => unreachable!(),
     };
     let output = app_m.value_of("output").unwrap();
+    let gain = (10.0 as f64).powf(app_m.value_of("gain").unwrap().parse::<f64>()? / 20.0);
 
     let mut reader = WavReader::open(input)?;
     let input_channels = reader.spec().channels;
@@ -143,8 +153,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for (l_in, r_in) in stereo_samples {
         let (l_out, r_out) = reverb.process_sample((f64::from(*l_in), f64::from(*r_in)));
-        writer.write_sample((f64::from(std::i16::MAX) * l_out) as i16)?;
-        writer.write_sample((f64::from(std::i16::MAX) * r_out) as i16)?;
+        writer.write_sample((gain * f64::from(std::i16::MAX) * l_out) as i16)?;
+        writer.write_sample((gain * f64::from(std::i16::MAX) * r_out) as i16)?;
     }
 
     writer.finalize()?;
