@@ -26,7 +26,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .short("o")
                 .help("Output WAV file")
                 .default_value("out.wav")
-                .takes_value(true)
                 .global(true),
         )
         .arg(
@@ -35,7 +34,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .long("gain")
                 .help("Final gain in dB")
                 .default_value("0")
-                .takes_value(true)
                 .global(true),
         )
         .subcommand(

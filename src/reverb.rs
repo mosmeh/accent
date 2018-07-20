@@ -281,8 +281,8 @@ impl Freeverb {
                 MonoFreeverb::new(sample_rate, feedback, damp, 0),
                 MonoFreeverb::new(sample_rate, feedback, damp, 23),
             ],
-            wet1: (width / 2.0 + 0.5) * 3.0 * wet,
-            wet2: (1.0 - width) / 2.0 * 3.0 * wet,
+            wet1: 1.5 * wet * (1.0 + width),
+            wet2: 1.5 * wet * (1.0 - width),
             dry: 2.0 * dry,
         }
     }

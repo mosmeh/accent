@@ -11,7 +11,7 @@ impl Delay {
             buffer.push_back(0.0);
         }
 
-        Delay { buffer }
+        Self { buffer }
     }
 
     pub fn input(&mut self, x: f64) {
