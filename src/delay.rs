@@ -15,8 +15,8 @@ impl Delay {
     }
 
     pub fn input(&mut self, x: f64) {
-        self.buffer.push_back(x);
         self.buffer.pop_front();
+        self.buffer.push_back(x);
     }
 
     pub fn output(&self) -> f64 {
