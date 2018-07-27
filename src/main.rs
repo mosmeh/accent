@@ -120,15 +120,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         SampleFormat::Int => match reader.spec().bits_per_sample {
             16 => reader
                 .samples::<i16>()
-                .map(|s| f32::from(s.unwrap()) / f32::from(std::i16::MAX))
+                .collect::<Result<Vec<_>, _>>()?
+                .iter()
+                .map(|s| f32::from(*s) / f32::from(std::i16::MAX))
                 .collect(),
             32 => reader
                 .samples::<i32>()
-                .map(|s| s.unwrap() as f32 / (std::i32::MAX as f32))
+                .collect::<Result<Vec<_>, _>>()?
+                .iter()
+                .map(|s| *s as f32 / (std::i32::MAX as f32))
                 .collect(),
             _ => unimplemented!(),
         },
-        SampleFormat::Float => reader.samples::<f32>().map(|s| s.unwrap()).collect(),
+        SampleFormat::Float => reader.samples::<f32>().collect::<Result<Vec<_>, _>>()?,
     };
     let stereo_samples: Vec<_> = match input_channels {
         1 => samples.iter().map(|s| (s, s)).collect(),
