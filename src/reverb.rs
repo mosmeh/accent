@@ -107,8 +107,7 @@ impl Reverb for STKJCRev {
                 let output = allpass_output + filter.process_sample(delay.output());
                 delay.input(output);
                 output
-            })
-            .sum();
+            }).sum();
 
         let output = (
             0.7 * (0.3 * self.out_delays[0].output() + 0.7 * input),

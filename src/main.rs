@@ -27,44 +27,37 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .help("Output WAV file")
                 .default_value("out.wav")
                 .global(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("gain")
                 .short("g")
                 .long("gain")
                 .help("Final gain in dB")
                 .default_value("0")
                 .global(true),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("jcrev")
                 .about("Original JCRev")
                 .arg(&arg_input),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("satrev")
                 .about("SATREV")
                 .arg(&arg_input),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("stk-jcrev")
                 .about("JCRev in Synthesis ToolKit")
                 .arg(&arg_input)
                 .arg(Arg::with_name("t60").long("t60").default_value("1")),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("prcrev")
                 .about("PRCRev")
                 .arg(&arg_input)
                 .arg(Arg::with_name("t60").long("t60").default_value("1")),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("nrev")
                 .about("NRev")
                 .arg(&arg_input)
                 .arg(Arg::with_name("t60").long("t60").default_value("1")),
-        )
-        .subcommand(
+        ).subcommand(
             SubCommand::with_name("freeverb")
                 .about("Freeverb")
                 .arg(&arg_input)
@@ -72,13 +65,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     Arg::with_name("roomsize")
                         .long("roomsize")
                         .default_value("0.1"),
-                )
-                .arg(Arg::with_name("damp").long("damp").default_value("0.1"))
+                ).arg(Arg::with_name("damp").long("damp").default_value("0.1"))
                 .arg(Arg::with_name("width").long("width").default_value("1"))
                 .arg(Arg::with_name("wet").long("wet").default_value("1"))
                 .arg(Arg::with_name("dry").long("dry").default_value("0")),
-        )
-        .get_matches();
+        ).get_matches();
     let input = match app_m.subcommand() {
         (_, Some(sub_m)) => sub_m.value_of("input").unwrap(),
         _ => unreachable!(),
