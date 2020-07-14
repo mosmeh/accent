@@ -2,9 +2,11 @@
 name = "accent"
 version = "0.1.0"
 authors = ["mosm <airman515@gmail.com>"]
+edition = "2018"
 description = "Minimal audio reverberator"
 
 [dependencies]
-itertools = "^0.7.8"
-clap = "^2.32.0"
-hound = "^3.4.0"
+anyhow = "1.0.31"
+clap = "2.32.0"
+hound = "3.4.0"
+itertools = "0.7.8"

@@ -1,4 +1,4 @@
-use delay::Delay;
+use crate::delay::Delay;
 
 pub trait Filter {
     fn process_sample(&mut self, x: f64) -> f64;

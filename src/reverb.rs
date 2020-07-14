@@ -1,5 +1,5 @@
-use delay::Delay;
-use filter::{Allpass, FeedbackComb, FeedforwardComb, Filter, LowpassFeedbackComb};
+use crate::delay::Delay;
+use crate::filter::{Allpass, FeedbackComb, FeedforwardComb, Filter, LowpassFeedbackComb};
 
 pub trait Reverb {
     fn process_sample(&mut self, x: (f64, f64)) -> (f64, f64);
@@ -107,7 +107,8 @@ impl Reverb for STKJCRev {
                 let output = allpass_output + filter.process_sample(delay.output());
                 delay.input(output);
                 output
-            }).sum();
+            })
+            .sum();
 
         let output = (
             0.7 * (0.3 * self.out_delays[0].output() + 0.7 * input),
