@@ -9,6 +9,7 @@ fn main() -> Result<()> {
         .help("Input WAV file")
         .required(true)
         .index(1);
+
     let app_m = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
@@ -28,6 +29,7 @@ fn main() -> Result<()> {
                 .long("gain")
                 .help("Final gain in dB")
                 .default_value("0")
+                .allow_hyphen_values(true)
                 .global(true),
         )
         .subcommand(
@@ -73,12 +75,16 @@ fn main() -> Result<()> {
                 .arg(Arg::with_name("dry").long("dry").default_value("0")),
         )
         .get_matches();
+
     let input = match app_m.subcommand() {
         (_, Some(sub_m)) => sub_m.value_of("input").unwrap(),
         _ => unreachable!(),
     };
+
     let output = app_m.value_of("output").unwrap();
-    let gain = (10.0 as f64).powf(app_m.value_of("gain").unwrap().parse::<f64>()? / 20.0);
+
+    let gain_db = app_m.value_of("gain").unwrap().parse::<f64>()?;
+    let gain = (10.0 as f64).powf(gain_db / 20.0);
 
     let mut reader = WavReader::open(input)?;
     let input_channels = reader.spec().channels;
