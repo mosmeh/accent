@@ -6,7 +6,7 @@ edition = "2018"
 description = "Minimal audio reverberator"
 
 [dependencies]
-anyhow = "1.0.31"
-clap = "2.32.0"
+anyhow = "1.0.33"
+clap = "2.33.3"
 hound = "3.4.0"
-itertools = "0.7.8"
+itertools = "0.9.0"
