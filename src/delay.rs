@@ -1,25 +1,30 @@
-use std::collections::VecDeque;
-
 pub struct Delay {
-    buffer: VecDeque<f64>,
+    buffer: Vec<f64>,
+    read_ptr: usize,
+    write_ptr: usize,
 }
 
 impl Delay {
     pub fn new(length: usize) -> Self {
-        let mut buffer = VecDeque::with_capacity(length);
-        for _ in 0..length {
-            buffer.push_back(0.0);
+        let buf_len = length.next_power_of_two();
+        Self {
+            buffer: vec![0.0; buf_len],
+            read_ptr: 0,
+            write_ptr: if length == buf_len {
+                0 // wrap around
+            } else {
+                length
+            },
         }
-
-        Self { buffer }
     }
 
     pub fn input(&mut self, x: f64) {
-        self.buffer.pop_front();
-        self.buffer.push_back(x);
+        self.buffer[self.write_ptr] = x;
+        self.read_ptr = (self.read_ptr + 1) & (self.buffer.len() - 1);
+        self.write_ptr = (self.write_ptr + 1) & (self.buffer.len() - 1);
     }
 
     pub fn output(&self) -> f64 {
-        *self.buffer.front().unwrap()
+        self.buffer[self.read_ptr]
     }
 }
