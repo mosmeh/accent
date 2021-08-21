@@ -4,26 +4,18 @@
 
 Minimal audio reverberator
 
-## Installation
-
-Clone this repository and run:
-
-```sh
-cargo install --path .
-```
-
 ## Usage
 
 To add reverberation to `input.wav` using JCRev algorithm and output to `output.wav`, run:
 
 ```sh
-accent jcrev input.wav -o output.wav
+cargo run --release -- jcrev input.wav -o output.wav
 ```
 
 You can also provide parameters to algorithms:
 
 ```sh
-accent freeverb input.wav -o output.wav --roomsize=0.5 --damp=0.2
+cargo run --release -- freeverb input.wav -o output.wav --roomsize=0.5 --damp=0.2
 ```
 
 Following algorithms are available:
