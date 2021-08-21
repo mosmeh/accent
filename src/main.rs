@@ -84,7 +84,7 @@ fn main() -> Result<()> {
     let output = app_m.value_of("output").unwrap();
 
     let gain_db = app_m.value_of("gain").unwrap().parse::<f64>()?;
-    let gain = (10.0 as f64).powf(gain_db / 20.0);
+    let gain = f64::powf(10.0, gain_db / 20.0);
 
     let mut reader = WavReader::open(input)?;
     let input_channels = reader.spec().channels;
